@@ -2,7 +2,7 @@
 //  CalendarViewController.swift
 //  BoxOffice
 //
-//  Created by goat, songjun on 2023/04/04.
+//  Created by kimseongjun on 2023/09/19.
 //
 
 import UIKit
@@ -40,4 +40,3 @@ extension CalendarViewController: UICalendarSelectionSingleDateDelegate {
         self.dismiss(animated: true)
     }
 }
-
