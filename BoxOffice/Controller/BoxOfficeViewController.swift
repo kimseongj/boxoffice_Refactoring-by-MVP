@@ -12,17 +12,9 @@ protocol CalendarDateDelegate: AnyObject {
 }
 
 final class BoxOfficeViewController: UIViewController {
-    let boxOfficeService = BoxOfficeService()
-    private var provider = Provider()
+    private var presenter: BoxOfficePresenter?
     private var isCurrentListLayout: Bool = true
-    private let imageSearchService = ImageSearchService()
-    let calendarViewController = CalendarViewController()
-    var choosenDate: String = "" {
-        didSet {
-            fetchDailyBoxOffice()
-            setNavigationBarTitle()            
-        }
-    }
+    private let imageSearchService = ImageSearchModel()
     
     @IBOutlet weak var boxOfficeListCollectionView: UICollectionView!
     lazy var activityIndicator = UIActivityIndicatorView()
@@ -31,27 +23,17 @@ final class BoxOfficeViewController: UIViewController {
         super.viewDidLoad()
         setURLCache()
         imageSearchService.removeCacheAfter30min()
-        fetchDailyBoxOffice()
         setUpView()
-        setCalendarViewDelegate()
-        
+        configurePresenter()
+        presenter?.getYesterdayDescription()
+    }
+    
+    private func configurePresenter() {
+        presenter = BoxOfficePresenter(boxOfficeView: self, dailyBoxOfficeService: DailyBoxOfficeModel())
     }
     
     private func setURLCache() {
         URLCache.shared = .init(memoryCapacity: 300 * 1024 * 1024, diskCapacity: 300 * 1024 * 1024, directory: FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0])
-    }
-    
-    private func fetchDailyBoxOffice() {
-        if choosenDate == "" {
-            choosenDate = self.getYesterdayDescription()
-        }
-        
-        boxOfficeService.fetchDailyBoxOfficeAPI(date: choosenDate) {
-            DispatchQueue.main.async {
-                self.boxOfficeListCollectionView.reloadData()
-                self.activityIndicator.stopAnimating()
-            }
-        }
     }
     
     private func setUpView() {
@@ -69,6 +51,11 @@ final class BoxOfficeViewController: UIViewController {
     
     @objc
     private func tabRightBarButton() {
+        guard let presenter = presenter else { return }
+        let calendarPresenter = CalendarPresenter()
+        let calendarViewController = CalendarViewController(presenter: calendarPresenter)
+
+        calendarViewController.presenter?.delegate = presenter
         self.present(calendarViewController, animated: true, completion: nil)
     }
     
@@ -112,22 +99,10 @@ final class BoxOfficeViewController: UIViewController {
             boxOfficeListCollectionView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor)
         ])
     }
-    
-    private func setCalendarViewDelegate() {
-        calendarViewController.delegate = self
-    }
-    
-    private func setNavigationBarTitle() {
-        self.title = choosenDate.insertDash()
-    }
-    
-    private func getYesterdayDescription() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd"
-        let yesterDate = formatter.string(from: Date(timeIntervalSinceNow: -86400))
-        return yesterDate
-    }
-    
+}
+
+//MARK: - boxOfficeListCollectionView Mode
+extension BoxOfficeViewController {
     private func setNavigationToolBar() {
         let flexibleSpace: UIBarButtonItem
         let changeModeButton: UIBarButtonItem
@@ -160,9 +135,21 @@ final class BoxOfficeViewController: UIViewController {
     }
 }
 
+//MARK: - BoxOfficeViewMakable
+extension BoxOfficeViewController: BoxOfficeViewMakable {
+    func renewNavigationBarTitle() {
+        self.title = presenter?.choosenDate.insertDash()
+    }
+    
+    func reload() {
+        boxOfficeListCollectionView.reloadData()
+    }
+}
+
+//MARK: - boxOfficeListCollectionView DataSource
 extension BoxOfficeViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return boxOfficeService.dailyBoxOffice?.boxOfficeResult.dailyBoxOfficeList.count ?? 0
+        return presenter?.sendDailyBoxOffice()?.boxOfficeResult.dailyBoxOfficeList.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -176,7 +163,7 @@ extension BoxOfficeViewController: UICollectionViewDataSource {
             cell.configureIconCellUI()
         }
         
-        guard let validDailyBoxOffice = boxOfficeService.dailyBoxOffice else {
+        guard let validDailyBoxOffice = presenter?.sendDailyBoxOffice() else {
             return cell
         }
 
@@ -184,39 +171,20 @@ extension BoxOfficeViewController: UICollectionViewDataSource {
         
         return cell
     }
-    
-    private func convertRankGapPresentation(indexPath: IndexPath) -> NSMutableAttributedString {
-        guard let rankGap = boxOfficeService.dailyBoxOffice?.boxOfficeResult.dailyBoxOfficeList[indexPath.row].rankGap,
-              let rankOldAndNew = boxOfficeService.dailyBoxOffice?.boxOfficeResult.dailyBoxOfficeList[indexPath.row].rankOldAndNew,
-               let intRankGap = Int(rankGap) else { return NSMutableAttributedString().makeColorToText(string: "", color: .red) }
-         
-         if rankOldAndNew == "NEW" {
-             return NSMutableAttributedString().makeColorToText(string: "신작", color: .red)
-         }
-         
-         switch intRankGap {
-         case -20 ... -1:
-             return NSMutableAttributedString().makeColorToText(string: "▼", color: .blue).makeColorToText(string: rankGap.trimmingCharacters(in: ["-"]), color: .black)
-         case 1...20:
-             return NSMutableAttributedString().makeColorToText(string: "▲", color: .red).makeColorToText(string: rankGap, color: .black)
-         case 0:
-             return NSMutableAttributedString().makeColorToText(string: "-", color: .black)
-         default:
-             return NSMutableAttributedString().makeColorToText(string: "", color: .black)
-         }
-     }
 }
 
+//MARK: - boxOfficeListCollectionView Delegate
 extension BoxOfficeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let movieDetailVC = MovieDetailViewController()
-        guard let movieCode = boxOfficeService.dailyBoxOffice?.boxOfficeResult.dailyBoxOfficeList[indexPath.row].movieCode else { return }
+        guard let movieCode = presenter?.sendDailyBoxOffice()?.boxOfficeResult.dailyBoxOfficeList[indexPath.row].movieCode else { return }
         movieDetailVC.boxOfficeService.receiveMovieCode(movieCode: movieCode)
-       
+        
         self.navigationController?.pushViewController(movieDetailVC, animated: true)
     }
 }
 
+//MARK: - Compositional Layout
 extension BoxOfficeViewController {
     private func setUpCompositionalListLayout() -> UICollectionViewLayout {
         let configuration = UICollectionLayoutListConfiguration(appearance: .plain)
@@ -244,11 +212,3 @@ extension BoxOfficeViewController {
         return layout
     }
 }
-
-extension BoxOfficeViewController: CalendarDateDelegate {
-    func receiveDate(date: String) {
-        choosenDate = date
-    }
-}
-
-
