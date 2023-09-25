@@ -19,4 +19,14 @@ class MovieDetailPresenter {
     init( movieDetailService: MovieDetailService = MovieDetailModel()) {
         self.movieDetailService = movieDetailService
     }
+    
+    func fetchMovieDetailData() {
+        movieDetailService.fetchMovieDetailAPI { [weak self] in
+            guard let self = self else { return }
+            
+            self.movieDetail = $0
+        }
+    }
+    
+    
 }
