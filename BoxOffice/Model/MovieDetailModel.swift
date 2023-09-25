@@ -7,7 +7,11 @@
 
 import Foundation
 
-final class MovieDetailModel {
+protocol MovieDetailService {
+    func fetchMovieDetailAPI(completion: @escaping () -> Void)
+}
+
+final class MovieDetailModel: MovieDetailService {
     let provider = Provider()
     var movieDetail: MovieDetail?
     var movieCode = ""
