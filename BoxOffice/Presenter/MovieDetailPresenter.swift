@@ -18,7 +18,7 @@ class MovieDetailPresenter {
     var imageSearchService: ImageSearchService
     var thumbnailImageData: Data?
     var movieCode: String
-    var movieName: String?
+    var movieName: String = "" 
     
     init(movieDetailService: MovieDetailService = MovieDetailModel(),
          imageSearchService: ImageSearchService = ImageSearchModel(), movieCode: String) {
@@ -27,11 +27,12 @@ class MovieDetailPresenter {
         self.movieCode = movieCode
     }
     
-    func fetchMovieDetailData() {
+    func fetchMovieDetailData(completion: @escaping () -> Void) {
         movieDetailService.fetchMovieDetailAPI(movieCode: movieCode) { [weak self] in
             guard let self = self else { return }
-            self.movieDetailView?.fillLabels(movieDetail: $0)
-            self.fetchSearchedImage(movieName: $0.movieInformationResult.movieInformation.movieName)
+                self.movieDetailView?.fillLabels(movieDetail: $0)
+                self.fetchSearchedImage(movieName: $0.movieInformationResult.movieInformation.movieName)
+            completion()
         }
     }
     
