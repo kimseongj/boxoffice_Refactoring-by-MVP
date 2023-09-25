@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MovieDetailService {
-    func fetchMovieDetailAPI(completion: @escaping () -> Void)
+    func fetchMovieDetailAPI(completion: @escaping (MovieDetail) -> Void)
 }
 
 final class MovieDetailModel: MovieDetailService {
@@ -16,14 +16,13 @@ final class MovieDetailModel: MovieDetailService {
     var movieDetail: MovieDetail?
     var movieCode = ""
     
-    func fetchMovieDetailAPI(completion: @escaping () -> Void) {
+    func fetchMovieDetailAPI(completion: @escaping (MovieDetail) -> Void) {
         var movieDetailEndpoint = MovieDetailEndpoint()
         movieDetailEndpoint.insertMovieCodeQueryValue(movieCode: movieCode)
         
         provider.loadBoxOfficeAPI(endpoint: movieDetailEndpoint,
                                   parser: Parser<MovieDetail>()) { parsedData in
-            self.movieDetail = parsedData
-            completion()
+            completion(parsedData)
         }
     }
     
