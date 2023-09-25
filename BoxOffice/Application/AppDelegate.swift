@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationWillTerminate(_ application: UIApplication) {
-        ImageSearchService().removeCache()
+        ImageSearchModel().removeCache()
     }
 }
 

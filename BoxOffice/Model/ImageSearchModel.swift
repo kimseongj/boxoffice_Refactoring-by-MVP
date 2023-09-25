@@ -1,5 +1,5 @@
 //
-//  ImageSearchService.swift
+//  ImageSearchModel.swift
 //  BoxOffice
 //
 //  Created by goat,songjun on 2023/04/05.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ImageSearchService {
+final class ImageSearchModel {
     private let provider = Provider()
     private var searchedImage: ImageSearch?
     
