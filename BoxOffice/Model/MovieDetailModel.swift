@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MovieDetailService {
-    func fetchMovieDetailAPI(completion: @escaping (MovieDetail) -> Void)
+    func fetchMovieDetailAPI(movieCode: String, completion: @escaping (MovieDetail) -> Void)
 }
 
 final class MovieDetailModel: MovieDetailService {
