@@ -7,13 +7,16 @@
 
 import Foundation
 
-final class ImageSearchModel {
+protocol ImageSearchService {
+    func fetchSearchedImage(movieName: String, completion: @escaping (Data) -> Void)
+}
+
+final class ImageSearchModel: ImageSearchService {
     private let provider = Provider()
     private var searchedImage: ImageSearch?
     
-    func fetchSearchedImage(boxOfficeService: BoxOfficeService, completion: @escaping (Data) -> Void) {
-        
-        guard let movieName = boxOfficeService.movieDetail?.movieInformationResult.movieInformation.movieName else { return }
+    func fetchSearchedImage(movieName: String, completion: @escaping (Data) -> Void) {
+                //movieDetail?.movieInformationResult.movieInformation.movieName else { return }
         
         var imageSearchEndpoint = ImageSearchEndpoint()
         imageSearchEndpoint.insertImageQueryValue(imageName: movieName)
@@ -22,13 +25,13 @@ final class ImageSearchModel {
             parsedData in
             
             guard let url = URL(string: parsedData.imageDatas[0].imageURL) else { return }
-            self.loadImageFromURL(url: url) { data in
-                completion(data)
+            self.loadImageFromURL(url: url) { imageData in
+                completion(imageData)
             }
         }
     }
     
-    func loadImageFromURL(url: URL, completion: @escaping (Data) -> Void){
+    func loadImageFromURL(url: URL, completion: @escaping (Data) -> Void) {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
         urlRequest.cachePolicy = .returnCacheDataElseLoad
