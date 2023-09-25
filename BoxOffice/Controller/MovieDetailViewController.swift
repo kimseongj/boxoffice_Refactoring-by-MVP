@@ -8,7 +8,7 @@
 import UIKit
 
 class MovieDetailViewController: UIViewController {
-    let boxOfficeService = BoxOfficeService()
+    private var presenter: MovieDetailPresenter?
     private let imageSearchService = ImageSearchModel()
     private let movieDetailView = MovieDetailView()
     private let provider = Provider()
@@ -19,12 +19,28 @@ class MovieDetailViewController: UIViewController {
         return activityIndicator
     }()
     
+    init(presenter: MovieDetailPresenter?) {
+        self.presenter = presenter
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view = movieDetailView
         setActivityIndicator()
-        fetchMoiveDetail()
+        configurePresenter()
+        presenter?.fetchMovieDetailData {
+            self.stopActivityIndicator()
         }
+    }
+    
+    func configurePresenter() {
+        presenter?.movieDetailView = self
+    }
     
     private func setActivityIndicator() {
         view.addSubview(activityIndicator)
@@ -34,67 +50,46 @@ class MovieDetailViewController: UIViewController {
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
-    
-    func fetchMoiveDetail() {
-        boxOfficeService.fetchMovieDetailAPI {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.setMovieDetailLabel()
-                self.fetchImage()
-                self.activityIndicator.stopAnimating()
-            }
+}
+
+extension MovieDetailViewController: MovieDetailViewMakable {
+    func fillLabels(movieDetail: MovieDetail?) {
+        DispatchQueue.main.async {
+            self.movieDetailView.directorTitleLabel.text = "감독"
+            self.movieDetailView.directorDataLabel.text = self.presenter?.reformString(movieDetail: movieDetail, labelText: "감독")
+            self.movieDetailView.productYearTitleLabel.text = "제작년도"
+            self.movieDetailView.productYearDataLabel.text = movieDetail?.movieInformationResult.movieInformation.productYear
+            
+            self.movieDetailView.openDayTitleLabel.text = "개봉일"
+            self.movieDetailView.openDayDataLabel.text =
+            movieDetail?.movieInformationResult.movieInformation.openDate.insertDash()
+            
+            self.movieDetailView.showTimeTitleLabel.text = "상영시간"
+            self.movieDetailView.showTimeDataLabel.text = movieDetail?.movieInformationResult.movieInformation.showTime
+            
+            self.movieDetailView.auditsTitleLabel.text = "관람등급"
+            self.movieDetailView.auditsDataLabel.text = self.presenter?.reformString(movieDetail: movieDetail, labelText: "관람등급")
+            
+            self.movieDetailView.nationTitleLabel.text = "제작국가"
+            self.movieDetailView.nationDataLabel.text = self.presenter?.reformString(movieDetail: movieDetail, labelText: "제작국가")
+            
+            self.movieDetailView.genreTitleLabel.text = "장르"
+            self.movieDetailView.genreDataLabel.text = self.presenter?.reformString(movieDetail: movieDetail, labelText: "장르")
+            
+            self.movieDetailView.actorTitleLabel.text = "배우"
+            self.movieDetailView.actorDataLabel.text = self.presenter?.reformString(movieDetail: movieDetail, labelText: "배우")
         }
     }
     
-    private func setMovieDetailLabel() {
-        movieDetailView.directorTitleLabel.text = "감독"
-        movieDetailView.directorDataLabel.text = self.reformString(labelText: "감독")
-        movieDetailView.productYearTitleLabel.text = "제작년도"
-        movieDetailView.productYearDataLabel.text = boxOfficeService.movieDetail?.movieInformationResult.movieInformation.productYear
-       
-        movieDetailView.openDayTitleLabel.text = "개봉일"
-        movieDetailView.openDayDataLabel.text =
-        boxOfficeService.movieDetail?.movieInformationResult.movieInformation.openDate.insertDash()
-        
-        movieDetailView.showTimeTitleLabel.text = "상영시간"
-        movieDetailView.showTimeDataLabel.text = boxOfficeService.movieDetail?.movieInformationResult.movieInformation.showTime
-        
-        movieDetailView.auditsTitleLabel.text = "관람등급"
-        movieDetailView.auditsDataLabel.text = self.reformString(labelText: "관람등급")
-        
-        movieDetailView.nationTitleLabel.text = "제작국가"
-        movieDetailView.nationDataLabel.text = self.reformString(labelText: "제작국가")
-        
-        movieDetailView.genreTitleLabel.text = "장르"
-        movieDetailView.genreDataLabel.text = self.reformString(labelText: "장르")
-        
-        movieDetailView.actorTitleLabel.text = "배우"
-        movieDetailView.actorDataLabel.text = self.reformString(labelText: "배우")
-    }
-
-    private func reformString(labelText: String) -> String {
-
-        switch labelText {
-        case "감독":
-            return boxOfficeService.movieDetail?.movieInformationResult.movieInformation.directors.map{$0.peopleName}.joined(separator: ", ") ?? ""
-        case "관람등급":
-            return boxOfficeService.movieDetail?.movieInformationResult.movieInformation.audits.map{$0.watchGradeName}.joined(separator: ", ") ?? ""
-        case "제작국가":
-            return boxOfficeService.movieDetail?.movieInformationResult.movieInformation.nations.map{$0.nationName}.joined(separator: ", ") ?? ""
-        case "장르":
-            return boxOfficeService.movieDetail?.movieInformationResult.movieInformation.genres.map{$0.genreName}.joined(separator: ", ") ?? ""
-        case "배우":
-            return boxOfficeService.movieDetail?.movieInformationResult.movieInformation.actors.map{$0.peopleName}.joined(separator: ", ") ?? ""
-        default:
-            return ""
+    func fillImage(iamgeData: Data) {
+        DispatchQueue.main.async {
+            self.movieDetailView.imageView.image = UIImage(data: iamgeData)
         }
     }
     
-    private func fetchImage() {
-        imageSearchService.fetchSearchedImage(boxOfficeService: boxOfficeService) { data in
-            DispatchQueue.main.async {
-                self.movieDetailView.imageView.image = UIImage(data: data)
-            }
+    func stopActivityIndicator() {
+        DispatchQueue.main.async {
+            self.activityIndicator.stopAnimating()
         }
     }
 }
