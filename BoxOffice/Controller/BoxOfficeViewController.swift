@@ -29,7 +29,7 @@ final class BoxOfficeViewController: UIViewController {
     }
     
     private func configurePresenter() {
-        presenter = BoxOfficePresenter(boxOfficeView: self, dailyBoxOfficeService: DailyBoxOfficeModel())
+        presenter = BoxOfficePresenter(boxOfficeView: self)
     }
     
     private func setURLCache() {
@@ -176,11 +176,12 @@ extension BoxOfficeViewController: UICollectionViewDataSource {
 //MARK: - boxOfficeListCollectionView Delegate
 extension BoxOfficeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let movieDetailVC = MovieDetailViewController()
         guard let movieCode = presenter?.sendDailyBoxOffice()?.boxOfficeResult.dailyBoxOfficeList[indexPath.row].movieCode else { return }
-        movieDetailVC.boxOfficeService.receiveMovieCode(movieCode: movieCode)
-        
-        self.navigationController?.pushViewController(movieDetailVC, animated: true)
+
+        let movieDetailPresenter = MovieDetailPresenter(movieCode: movieCode)
+        let movieDetailViewController = MovieDetailViewController(presenter: movieDetailPresenter)
+ 
+        self.navigationController?.pushViewController(movieDetailViewController, animated: true)
     }
 }
 
