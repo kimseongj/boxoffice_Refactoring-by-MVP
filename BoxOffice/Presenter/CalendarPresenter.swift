@@ -11,22 +11,10 @@ protocol CalendarViewMakable: AnyObject {
     
 }
 
-protocol CalendarViewPresenter {
-    init(calendarView: CalendarViewMakable)
-    func showView()
-}
-
-class CalendarPresenter: CalendarViewPresenter {
+class CalendarPresenter {
     weak var calendarView: CalendarViewMakable?
+    var delegate: SendChoosenDateDelegate?
     var choosenDate: String = ""
-    
-    required init(calendarView: CalendarViewMakable) {
-        self.calendarView = calendarView
-    }
-    
-    func showView() {
-        
-    }
     
     func receiveChoosenDate(_ choosenDate: String) {
         self.choosenDate = choosenDate
@@ -34,5 +22,9 @@ class CalendarPresenter: CalendarViewPresenter {
     
     func resetChoosenDate() {
         choosenDate = ""
+    }
+    
+    func sendChoosenDate() {
+        delegate?.receive(choosenDate: choosenDate)
     }
 }
