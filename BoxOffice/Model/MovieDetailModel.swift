@@ -14,9 +14,8 @@ protocol MovieDetailService {
 final class MovieDetailModel: MovieDetailService {
     let provider = Provider()
     var movieDetail: MovieDetail?
-    var movieCode = ""
     
-    func fetchMovieDetailAPI(completion: @escaping (MovieDetail) -> Void) {
+    func fetchMovieDetailAPI(movieCode: String, completion: @escaping (MovieDetail) -> Void) {
         var movieDetailEndpoint = MovieDetailEndpoint()
         movieDetailEndpoint.insertMovieCodeQueryValue(movieCode: movieCode)
         
@@ -24,9 +23,5 @@ final class MovieDetailModel: MovieDetailService {
                                   parser: Parser<MovieDetail>()) { parsedData in
             completion(parsedData)
         }
-    }
-    
-    func receiveMovieCode(movieCode: String) {
-        self.movieCode = movieCode
     }
 }
