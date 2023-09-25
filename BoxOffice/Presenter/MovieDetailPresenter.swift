@@ -8,25 +8,37 @@
 import Foundation
 
 protocol MovieDetailViewMakable: AnyObject {
-    func fillLabels()
+    func fillLabels(movieDetail: MovieDetail?)
+    func fillImage(iamgeData: Data)
 }
 
 class MovieDetailPresenter {
-    weak var boxOfficeView: BoxOfficeViewMakable?
+    weak var movieDetailView: MovieDetailViewMakable?
     var movieDetailService: MovieDetailService
-    var movieDetail: MovieDetail?
+    var imageSearchService: ImageSearchService
+    var thumbnailImageData: Data?
+    var movieCode: String
+    var movieName: String?
     
-    init( movieDetailService: MovieDetailService = MovieDetailModel()) {
+    init(movieDetailService: MovieDetailService = MovieDetailModel(),
+         imageSearchService: ImageSearchService = ImageSearchModel(), movieCode: String) {
         self.movieDetailService = movieDetailService
+        self.imageSearchService = imageSearchService
+        self.movieCode = movieCode
     }
     
     func fetchMovieDetailData() {
-        movieDetailService.fetchMovieDetailAPI { [weak self] in
+        movieDetailService.fetchMovieDetailAPI(movieCode: movieCode) { [weak self] in
             guard let self = self else { return }
-            
-            self.movieDetail = $0
+            self.movieDetailView?.fillLabels(movieDetail: $0)
+            self.fetchSearchedImage(movieName: $0.movieInformationResult.movieInformation.movieName)
         }
     }
     
-    
+    func fetchSearchedImage(movieName: String) {
+        imageSearchService.fetchSearchedImage(movieName: movieName) { [weak self] in
+            guard let self = self else { return }
+            self.movieDetailView?.fillImage(iamgeData: $0)
+        }
+    }
 }
