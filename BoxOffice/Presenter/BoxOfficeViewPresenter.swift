@@ -14,6 +14,8 @@ protocol BoxOfficeViewMakable: AnyObject {
 
 class BoxOfficePresenter: SendChoosenDateDelegate {
     weak var boxOfficeView: BoxOfficeViewMakable?
+    var dailyBoxOfficeService: DailyBoxOfficeService
+    var dailyBoxOffice: DailyBoxOffice?
     var choosenDate: String = "" {
         didSet {
             fetchBoxOfficeData {
@@ -24,15 +26,14 @@ class BoxOfficePresenter: SendChoosenDateDelegate {
             }
         }
     }
-    var dailyBoxOfficeService: DailyBoxOfficeService
-    var dailyBoxOffice: DailyBoxOffice?
+    
     
     
     func receive(choosenDate: String) {
         self.choosenDate = choosenDate
     }
     
-    init(boxOfficeView: BoxOfficeViewMakable, dailyBoxOfficeService: DailyBoxOfficeService) {
+    init(boxOfficeView: BoxOfficeViewMakable, dailyBoxOfficeService: DailyBoxOfficeService = DailyBoxOfficeModel()) {
         self.boxOfficeView = boxOfficeView
         self.dailyBoxOfficeService = dailyBoxOfficeService
         
