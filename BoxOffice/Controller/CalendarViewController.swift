@@ -16,7 +16,6 @@ class CalendarViewController: UIViewController, CalendarViewMakable {
         super.viewDidLoad()
         view = calendarView
         setCalendarViewSelectionBehavior()
-        //configurePresenter()
     }
     
     init(presenter: CalendarPresenter?) {

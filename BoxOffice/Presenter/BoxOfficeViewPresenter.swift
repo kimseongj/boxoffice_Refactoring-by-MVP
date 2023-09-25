@@ -27,8 +27,6 @@ class BoxOfficePresenter: SendChoosenDateDelegate {
         }
     }
     
-    
-    
     func receive(choosenDate: String) {
         self.choosenDate = choosenDate
     }
@@ -65,7 +63,6 @@ class BoxOfficePresenter: SendChoosenDateDelegate {
         choosenDate = yesterDate
     }
 }
-
 
 protocol SendChoosenDateDelegate: AnyObject {
     func receive(choosenDate: String)
