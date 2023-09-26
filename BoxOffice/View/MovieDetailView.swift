@@ -90,7 +90,7 @@ class MovieDetailView: UIView {
         let label = UILabel()
         label.textAlignment = .center
         label.adjustsFontForContentSizeCategory = true
-        label.font = UIFont.preferredFont(forTextStyle: .headline)
+        label.font = UIFont(name: "Pretendard-Bold", size: 14)
         return label
     }
     

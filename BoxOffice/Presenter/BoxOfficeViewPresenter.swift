@@ -10,6 +10,7 @@ import Foundation
 protocol BoxOfficeViewMakable: AnyObject {
     func renewNavigationBarTitle()
     func reload()
+    func stopActivityIndicator()
 }
 
 class BoxOfficePresenter: SendChoosenDateDelegate {
@@ -22,6 +23,7 @@ class BoxOfficePresenter: SendChoosenDateDelegate {
                 DispatchQueue.main.async {
                     self.boxOfficeView?.reload()
                     self.boxOfficeView?.renewNavigationBarTitle()
+                    self.boxOfficeView?.stopActivityIndicator()
                 }
             }
         }

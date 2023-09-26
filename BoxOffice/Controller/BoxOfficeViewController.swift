@@ -144,6 +144,10 @@ extension BoxOfficeViewController: BoxOfficeViewMakable {
     func reload() {
         boxOfficeListCollectionView.reloadData()
     }
+    
+    func stopActivityIndicator() {
+        activityIndicator.stopAnimating()
+    }
 }
 
 //MARK: - boxOfficeListCollectionView DataSource
