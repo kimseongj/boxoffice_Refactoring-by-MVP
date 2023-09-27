@@ -10,29 +10,30 @@ import Foundation
 protocol BoxOfficeViewMakable: AnyObject {
     func renewNavigationBarTitle()
     func reload()
+    func stopActivityIndicator()
 }
 
 class BoxOfficePresenter: SendChoosenDateDelegate {
     weak var boxOfficeView: BoxOfficeViewMakable?
+    var dailyBoxOfficeService: DailyBoxOfficeService
+    var dailyBoxOffice: DailyBoxOffice?
     var choosenDate: String = "" {
         didSet {
             fetchBoxOfficeData {
                 DispatchQueue.main.async {
                     self.boxOfficeView?.reload()
                     self.boxOfficeView?.renewNavigationBarTitle()
+                    self.boxOfficeView?.stopActivityIndicator()
                 }
             }
         }
     }
-    var dailyBoxOfficeService: DailyBoxOfficeService
-    var dailyBoxOffice: DailyBoxOffice?
-    
     
     func receive(choosenDate: String) {
         self.choosenDate = choosenDate
     }
     
-    init(boxOfficeView: BoxOfficeViewMakable, dailyBoxOfficeService: DailyBoxOfficeService) {
+    init(boxOfficeView: BoxOfficeViewMakable, dailyBoxOfficeService: DailyBoxOfficeService = DailyBoxOfficeModel()) {
         self.boxOfficeView = boxOfficeView
         self.dailyBoxOfficeService = dailyBoxOfficeService
         
@@ -64,7 +65,6 @@ class BoxOfficePresenter: SendChoosenDateDelegate {
         choosenDate = yesterDate
     }
 }
-
 
 protocol SendChoosenDateDelegate: AnyObject {
     func receive(choosenDate: String)

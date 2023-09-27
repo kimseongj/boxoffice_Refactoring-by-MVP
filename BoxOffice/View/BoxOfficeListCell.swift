@@ -98,8 +98,8 @@ class BoxOfficeListCell: UICollectionViewListCell  {
 
     private func setUpLabelStyle() {
         rankNumberLabel.font = UIFont.preferredFont(forTextStyle: .largeTitle)
-        rankGapLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
-        movieTitleLabel.font = UIFont.preferredFont(forTextStyle: .title3)
+        rankGapLabel.font = UIFont(name: "Pretendard-Bold", size: 18)
+        movieTitleLabel.font = UIFont(name: "Pretendard-Black", size: 18)
         audienceCountLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
         rankGapLabel.textAlignment = .center
     }
