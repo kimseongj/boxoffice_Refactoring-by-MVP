@@ -14,10 +14,7 @@
 
 ## ⚙️ 기술 스택
 
-<img src="https://img.shields.io/badge/MVP-100AF?style=flat-square"/>
-<img src="https://img.shields.io/badge/NetworkLayer-AAA1AF?style=flat-square"/>
-<img src="https://img.shields.io/badge/URLSession-100000?style=flat-square"/>
-<img src="https://img.shields.io/badge/ModernCollectionView-FF0000?style=flat-square"/>
+<img src="https://img.shields.io/badge/MVP-100AF?style=flat-square"/> <img src="https://img.shields.io/badge/NetworkLayer-AAA1AF?style=flat-square"/> <img src="https://img.shields.io/badge/URLSession-100000?style=flat-square"/> <img src="https://img.shields.io/badge/ModernCollectionView-FF0000?style=flat-square"/>
 
 ## 📝 아키텍쳐
 ### - MVP
